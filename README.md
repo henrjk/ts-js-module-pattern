@@ -80,7 +80,7 @@ module cats {
 }
 
 ```
- This was translated by typescript to this code:
+ This was translated by typescript to:
 ```JavaScript
 // typescript compiled code cats.model.js - this comment added manually.
 var cats;
@@ -101,7 +101,7 @@ var cats;
 The typescript generated is equivalent to the original JavaScript code, which the original goal was.
 
 When converting the root module `cats` it was not clear to me how to
-expose the module correctly without introducing a new variable. So I used code as shown for the submodules instead:
+expose the module correctly without introducing a new variable. So I used code as shown above for submodules instead:
 
 ```typescript
 module cats {
@@ -118,13 +118,13 @@ module cats {
 
 Unexpectedly this caused this error:
 ```console
-ts-js-module-pattern dev$ tsc -v
-message TS6029: Version 1.5.0-beta
 ts-js-module-pattern dev$ tsc -p app
 app/cats.ts(4,10): error TS2339: Property 'model' does not exist on type '{ initModule: () => void; }'.
+ts-js-module-pattern dev$ tsc -v
+message TS6029: Version 1.5.0-beta
 ```
 
-In the typescript generated JavaScript code:
+In the typescript generated code:
 ```JavaScript
 var cats;
 (function (cats_1) {
@@ -138,6 +138,6 @@ var cats;
 })(cats || (cats = {}));
 ```
 
-a variable `cats_1` is introduced which probably confuses typescript so that it no longer associates the module `cats` with `cats_1`.
+a variable `cats_1` is introduced which probably confuses typescript so that `cats` in code `cats.model.initModule()` no longer references the cats module as expected, but to `cats.cats.model` which of course is not defined.
 
 This looks like a bug to me.  
