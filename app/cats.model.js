@@ -1,5 +1,6 @@
 var cats;
 (function (cats) {
+    'use strict';
     var initModule = function () {
     };
     var getCat = function () {

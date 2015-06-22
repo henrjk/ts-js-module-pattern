@@ -1,5 +1,5 @@
 module cats {
-
+  'use strict';
   var initModule = function(): void {
     // some init code here.
   }
