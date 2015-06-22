@@ -12,6 +12,7 @@
     },
     "files": [
         "./cats.model.ts",
-        "./cats.ts"
+        "./cats.ts",
+        "./cats.view.ts"
     ]
 }

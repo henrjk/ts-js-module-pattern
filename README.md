@@ -1,6 +1,8 @@
 # ts-js-module-pattern
 Demonstrates an issue when converting existing JavaScript to typescript.
 
+See also [https://github.com/Microsoft/TypeScript/issues/3597](https://github.com/Microsoft/TypeScript/issues/3597)
+
 This is about converting some preexisting JavaScript code which runs in
 the Browser.
 The patters in the JavaScript code originated from the book [Single Page Web Applications
@@ -116,7 +118,7 @@ module cats {
 }
 ```
 
-Unexpectedly this caused this error:
+This causes the following error which surprised me initially:
 ```console
 ts-js-module-pattern dev$ tsc -p app
 app/cats.ts(4,10): error TS2339: Property 'model' does not exist on type '{ initModule: () => void; }'.
@@ -138,9 +140,13 @@ var cats;
 })(cats || (cats = {}));
 ```
 
-a variable `cats_1` is introduced which probably confuses typescript so that `cats` in code `cats.model.initModule()` no longer references the cats module as expected, but to `cats.cats.model` which of course is not defined.
+variable `cats_1` is introduced. `cats.model` in the source code
+refers to `cats.cats.model` which of course is not defined. Note that in
+the original JavaScript pattern these references work as (naively) expected.
 
-By not referencing the module `cats` with initModule as shown:
+While this can be worked around by not referencing the module `cats` in the
+initModule function as shown below this would cause wider changes in the
+existing source code:
 
 ```typescript
 module cats {
@@ -169,16 +175,14 @@ var cats;
 })(cats || (cats = {}));
 ```
 
-And this also works when changing the name from `cats.cats` to `cats.root`:
-```typescript
-module cats {
-  'use strict'
-  var initModule = function () {
-    model.initModule();
-  }
+Section [4.3 Identifiers](https://github.com/Microsoft/TypeScript/blob/master/doc/spec.md#43-identifiers) in
+the TypeScript specification says *When an expression is an Identifier, the expression refers to the most nested module, class, enum, function, variable, or parameter with that name whose scope (section 2.4) includes the location of the reference.*
 
-  export var root = {
-    initModule : initModule
-  };
-}
-```
+This appears to indicate that the `cats` reference inside the module `cats` resolves
+to cats.cats because this was defined. However one could perhaps also take the
+entire qualified reference `cats.model` and discover that this is not defined in
+module `cats` and therefore assume that this is the most nested name with the
+name in scope.
+
+The current behavior is confusing if one defines a root module as
+<module-name>.<module-name>.
