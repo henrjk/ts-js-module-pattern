@@ -1,5 +1,5 @@
 # ts-js-module-pattern
-Demonstrate a potential bug in typescript
+Demonstrates an issue when converting existing JavaScript to typescript.
 
 This is about converting some preexisting JavaScript code which runs in
 the Browser.
@@ -140,4 +140,45 @@ var cats;
 
 a variable `cats_1` is introduced which probably confuses typescript so that `cats` in code `cats.model.initModule()` no longer references the cats module as expected, but to `cats.cats.model` which of course is not defined.
 
-This looks like a bug to me.  
+By not referencing the module `cats` with initModule as shown:
+
+```typescript
+module cats {
+  'use strict'
+  var initModule = function () {
+    model.initModule();
+  }
+
+  export var cats = {
+    initModule : initModule
+  };
+}
+```
+
+the expected JavaScript is generated
+```JavaScript
+var cats;
+(function (cats_1) {
+    'use strict';
+    var initModule = function () {
+        cats_1.model.initModule();
+    };
+    cats_1.cats = {
+        initModule: initModule
+    };
+})(cats || (cats = {}));
+```
+
+And this also works when changing the name from `cats.cats` to `cats.root`:
+```typescript
+module cats {
+  'use strict'
+  var initModule = function () {
+    model.initModule();
+  }
+
+  export var root = {
+    initModule : initModule
+  };
+}
+```
